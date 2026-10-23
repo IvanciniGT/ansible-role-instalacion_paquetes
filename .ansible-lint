@@ -4,6 +4,6 @@
 # Los argumentos del role (paquete, version, clave...) no llevan el prefijo
 # instalacion_paquetes_ que pide var-naming[no-role-prefix]. Es deliberado:
 # son su interfaz pública, se diseñaron así y los usan los playbooks. Las
-# variables INTERNAS del role sí lo llevan. Por eso la regla no se desactiva
-# aquí para todo, sino con un noqa en cada tarea que llama al role con ellos.
+# variables INTERNAS del role sí lo llevan, y por eso la regla no se
+# desactiva: el playbook que llama al role con ellos pone un noqa en su tarea.
 profile: production
