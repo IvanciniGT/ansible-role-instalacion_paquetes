@@ -3,7 +3,7 @@
 # playbook con gather_facts: false es lo normal, y lo correcto. Así que, si no
 # sabe en qué familia de sistema operativo está, lo pregunta él. Solo eso: un
 # gather_facts completo tarda, y aquí no hace falta nada más.
-- name:                                     Averiguar la familia del sistema operativo, si nadie lo ha hecho ya
+- name:                                     Averiguar la FAMILIA del sistema operativo, si nadie lo ha hecho ya
   ansible.builtin.setup:
     gather_subset:
                                           - "!all"
