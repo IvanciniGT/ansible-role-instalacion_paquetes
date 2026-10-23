@@ -1,0 +1,37 @@
+---
+- name:                   Asegurar que tenemos los repos del paquete configurados en el host (con sus claves)
+  ansible.builtin.yum_repository:
+    name:                 "{{ paquete }}"
+    description:          "{{ paquete }}"
+    baseurl:              "{{ repositorio }}"
+    gpgcheck:             "{{ clave | length > 0 }}"
+    gpgkey:               "{{ clave if clave | length > 0 else omit }}" # omit: si no hay clave, como si no hubiera escrito la línea
+    # En RHEL 8 y 9 muchos paquetes (nginx entre ellos) vienen también como
+    # módulos de AppStream, y dnf esconde los de cualquier otro repositorio que
+    # se llamen igual. Sin esto, el repositorio queda configurado y dnf sigue
+    # instalando la versión del módulo sin decir nada.
+    module_hotfixes:      true
+  when:                   repositorio | length > 0
+                          # Cuando me han pasado repos específicos. Si tiran de repos oficiales no. -> CONDICIONAL!
+  become:                 true # Necesito permisos de superusuario para poder hacer esta tarea.
+                          # Mi problema no es mirar si tengo esos permisos. NECESITO ESOS PERMISOS.
+                          # Cómo se convierte en superusuario (sudo, su...) es cosa de quien ejecute
+                          # el playbook, en SU entorno, que es suyo y no mío.
+
+- name:                   Asegurar que el paquete queda instalado en el host en la versión que me interesa
+                          # Este es el que ejecutará el dnf
+  ansible.builtin.dnf:
+    # Operador ternario de Jinja: VALOR_SI_SE_CUMPLE if CONDICION else VALOR_SI_NO
+    #   sin versión      -> nginx
+    #   versión exacta   -> nginx-1.20.1
+    #   con operador     -> nginx >= 1.20
+    name:                 >-
+                          {{ paquete if not version
+                             else (paquete ~ '-' ~ version) if operador_version == '='
+                             else (paquete ~ ' ' ~ operador_version ~ ' ' ~ version) }}
+    state:                present
+    # En dnf actualizar la caché no cuenta como cambio: el módulo solo dice
+    # «changed» si instala algo. Por eso aquí no hace falta el changed_when
+    # que sí necesita apt.
+    update_cache:         true
+  become:                 true
