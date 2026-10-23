@@ -2,7 +2,7 @@
 # Prueba del role contra máquinas reales: una RedHat y una Debian.
 #
 # Cubre los tres caminos que tiene el role:
-#   - curl: repositorios oficiales, sin versión.
+#   - tree: repositorios oficiales, sin versión.
 #   - gh:   repositorio propio con clave y versión mínima. Su clave apt es
 #           binaria (.gpg) y la de rpm es texto (.asc): prueba también que la
 #           clave se guarda con la extensión que apt necesita.
@@ -24,11 +24,11 @@
         suite:          stable
 
   tasks:
-    - name:             Instalar curl de los repositorios oficiales
+    - name:             Instalar tree de los repositorios oficiales
       ansible.builtin.include_role:  # noqa: var-naming[no-role-prefix]
         name:           instalacion_paquetes
       vars:
-        paquete:        curl
+        paquete:        tree
 
     - name:             Instalar gh 2.0 o superior desde el repositorio de GitHub
       ansible.builtin.include_role:  # noqa: var-naming[no-role-prefix]
@@ -53,7 +53,7 @@
           ansible.builtin.include_role:  # noqa: var-naming[no-role-prefix]
             name:       instalacion_paquetes
           vars:
-            paquete:    curl
+            paquete:    tree
             version:    "1.0"
             operador_version: "=>"
         - name:         Si llega aquí, la validación no ha funcionado

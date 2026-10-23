@@ -135,11 +135,11 @@ clave binaria guardada como `.asc`, apt la ignora y el repositorio falla con `NO
 ### Lo más simple: el de la distribución, el último
 
 ```yaml
-- name: Asegurar que curl está instalado
+- name: Asegurar que tree está instalado
   ansible.builtin.include_role:
     name: instalacion_paquetes
   vars:
-    paquete: curl
+    paquete: tree
 ```
 
 ### Desde un repositorio propio, con clave
@@ -192,7 +192,7 @@ llamarlo así:
 ```yaml
 dependencias:
   git:   { version: "2.30", operador: ">=" }
-  curl:  {}
+  tree:  {}
   rsync: {}
 ```
 
