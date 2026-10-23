@@ -103,6 +103,32 @@ la revisión del empaquetador: `1.24.0-2ubuntu7`, no `1.24.0`. Para «cualquier
 1.24» se usa un comodín: `version: "1.24*"`. En dnf vale lo mismo:
 `version: "1.20*"`.
 
+### Con versión, siempre la más nueva que la cumpla
+
+Cuando se da una versión, el paquete se instala con `state: latest`: **la más
+nueva disponible que cumpla la condición**, y en cada ejecución. Si mañana sale
+una que también la cumple, la siguiente ejecución la instala.
+
+`present` no sirve, porque no actualiza lo que ya está instalado. Con dnf, una
+nginx 1.20 instalada se da por buena aunque se pida `>= 1.26`, sin ningún
+error.
+
+dnf y apt no saben nada de versionado semántico: solo comparan números. Así que
+`>=` no se para en ninguna MAJOR:
+
+| `version` | `operador_version` | Instala, y va subiendo a        |
+|-----------|--------------------|---------------------------------|
+| `2.4.1`   | `=`                | la 2.4.1, y de ahí no se mueve  |
+| `2.4*`    | `=`                | la última 2.4.x: solo parches   |
+| `2.*`     | `=`                | la última 2.x: minors y parches |
+| `2.4`     | `>=`               | la última que haya, **3.0 incluida** |
+
+Para seguir una rama sin saltar de MAJOR, `=` con comodín. Comprobado con dnf
+en Rocky 9 y con apt en Ubuntu 24.04.
+
+**Sin versión no se actualiza nada.** Si no se pide ninguna, el paquete se
+instala con `present`, y lanzar el playbook no cambia la versión que haya.
+
 ### El repositorio, en cada gestor
 
 La misma URL no significa lo mismo en los dos:
@@ -227,8 +253,12 @@ distribution`). Un `gather_facts` completo tarda, y aquí no hace falta.
 
 ## Idempotencia
 
-Una segunda ejecución sin cambios termina **sin ningún `changed`**. El
-`apt update` lleva `changed_when: false`. Actualizar la caché sí cambia la
+Una segunda ejecución sin cambios termina **sin ningún `changed`**. Con una
+excepción buscada: si se ha pedido una versión y desde la última ejecución ha
+salido otra que la cumple, se instala y sale `changed`. Ese `changed` es justo
+el que interesa ver.
+
+El `apt update` lleva `changed_when: false`. Actualizar la caché sí cambia la
 máquina, pero no es un cambio que interese controlar. Si contara, cada
 ejecución diría que ha tocado algo, y un cambio de verdad pasaría desapercibido
 entre los falsos.

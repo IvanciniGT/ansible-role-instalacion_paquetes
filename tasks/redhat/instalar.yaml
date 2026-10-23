@@ -29,7 +29,17 @@
                           {{ paquete if not version
                              else (paquete ~ '-' ~ version) if operador_version == '='
                              else (paquete ~ ' ' ~ operador_version ~ ' ' ~ version) }}
-    state:                present
+    # Con versión, latest: la más nueva que cumpla la condición. Con present,
+    # si ya hay una instalada que NO la cumple (1.20 cuando se pide >= 1.26),
+    # dnf la da por buena y no actualiza. latest sí actualiza.
+    #
+    # Y sube a la más nueva que cumpla, en cada ejecución: con >= 2.4, el día
+    # que salga la 3.0 se instalará la 3.0. Para quedarse en una rama se usa
+    # = con comodín: «2.4*» solo parches, «2.*» también minors.
+    #
+    # Sin versión, present: si nadie ha pedido una versión, no se actualiza
+    # nada por el hecho de ejecutar el playbook.
+    state:                "{{ 'latest' if version else 'present' }}"
     # En dnf actualizar la caché no cuenta como cambio: el módulo solo dice
     # «changed» si instala algo. Por eso aquí no hace falta el changed_when
     # que sí necesita apt.
